@@ -43,11 +43,13 @@ class GD(Optimizer):
         lr = self.lr * (0.5 ** (round_i // 50))
         for param_group in self.param_groups:
             param_group['lr'] = lr
- 
+            
     def soft_decay_learning_rate(self):
         self.lr *= 0.99
         for param_group in self.param_groups:
             param_group['lr'] = self.lr
+            print(param_group['lr'])
+ 
 
     def inverse_prop_decay_learning_rate(self, round_i):
         # self.lr *= 0.99

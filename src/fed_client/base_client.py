@@ -105,20 +105,6 @@ class Client():
         flat_grads = get_flat_grad(loss, self.model.parameters(), create_graph=True)
         return flat_grads
 
-    # def get_model_gradients(self):
-    #     gradients = {}
-    #     for name, param in self.model.named_parameters():
-    #         if param.grad is not None:
-    #             gradients[name] = param.grad.clone().detach()
-    #     return gradients
-
-    # def set_model_gradients(self, gradient_dict):
-    #     for name, param in self.model.named_parameters():
-    #         if name in gradient_dict:
-    #             param.grad = gradient_dict[name]
-    
-
-
 
     def local_train(self, ):
         begin_time = time.time()

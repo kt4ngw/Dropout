@@ -55,6 +55,7 @@ class FedAsync(BaseFederated):
 
     def server_run(self):
         print('=== Select {} clients per round ===\n'.format(int(self.clients_num)))
+        seq = []
         # 给参数给本地   
         for client in self.clients:
             client.response_queue.put((copy.deepcopy(self.latest_global_model), self.epoch)) 
@@ -74,10 +75,11 @@ class FedAsync(BaseFederated):
                 print("Data updated from Client ID: {}".format(
                                                                            client.id))
                 client.response_queue.put((copy.deepcopy(self.latest_global_model), self.epoch)) 
+                seq.append(client.id)
             else:
                 time.sleep(1)
 
-                
+        print(seq)      
         self.test_latest_model_on_testdata(self.num_round)
         for client in self.clients:
             client.response_queue.put("STOP")
