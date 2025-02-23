@@ -34,8 +34,8 @@ class Async_CLient(Client):
         self.response_queue = queue.Queue()  # 接收服务器信息的队列
         self.client_epoch = None # 全局模型时间戳
 
+
     def local_train(self, ):
-        # local_model_paras, dict = self.local_update(self.local_dataset, self.options, )
         while True:
             while self.response_queue.empty():
                 time.sleep(1)
@@ -49,10 +49,10 @@ class Async_CLient(Client):
             self.set_flat_model_params(self.local_model_para)
             local_model_paras, return_dict = self.local_update(self.local_dataset, self.options)
             self.server.data_queue.put((self, local_model_paras, self.client_epoch))
-            # time.sleep(2)
 
 
     def local_update(self, local_dataset, options, ):
+        gobal_model = copy.deepcopy(self.server.get_flat_model_params())
         self.optimizer = GD(self.model.parameters(), lr=options['lr'])
         # batch_size=options['batch_size']
         if options['batch_size'] == -1:
@@ -73,7 +73,11 @@ class Async_CLient(Client):
                     X, y = X.cuda(), y.cuda()
                 self.optimizer.zero_grad()
                 _, pred = self.model(X)
-                loss = criterion(pred, y)
+                a = time.time()
+                reg_loss = torch.norm(self.get_flat_model_params() - gobal_model, p=2) ** 2
+                b = time.time()
+                reg_loss = (0.0001 / 2) * reg_loss
+                loss = criterion(pred, y) + reg_loss
                 loss.backward()
                 self.optimizer.step()
 

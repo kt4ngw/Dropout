@@ -55,31 +55,28 @@ class FedAsync(BaseFederated):
 
     def server_run(self):
         print('=== Select {} clients per round ===\n'.format(int(self.clients_num)))
-        seq = []
         # 给参数给本地   
         for client in self.clients:
             client.response_queue.put((copy.deepcopy(self.latest_global_model), self.epoch)) 
-        # self.test_latest_model_on_testdata(0)
+        # self.test_latest_model_on_testdata(0)、
+
         for round_i in range(self.num_round):
             print(f"Round {round_i + 1}/{self.num_round} starting...")
             self.test_latest_model_on_testdata(round_i)
          
             local_model_paras_set = []
-            if not self.data_queue.empty():
-                client, client_weights, epoch = self.data_queue.get() 
-                local_model_paras_set.append((client, client_weights, epoch))
-                self.epoch = round_i + 1 # 全局迭代次数
-                self.client_epoch = epoch
-                self.latest_global_model = self.aggregate_async(client_weights)
-                # self.test_latest_model_on_testdata(round_i)
-                print("Data updated from Client ID: {}".format(
-                                                                           client.id))
-                client.response_queue.put((copy.deepcopy(self.latest_global_model), self.epoch)) 
-                seq.append(client.id)
-            else:
-                time.sleep(1)
+            while True:
+                if not self.data_queue.empty():
+                    client, client_weights, epoch = self.data_queue.get() 
+                    local_model_paras_set.append((client, client_weights, epoch))
+                    self.epoch = round_i + 1 # 全局迭代次数
+                    self.client_epoch = epoch
+                    self.latest_global_model = self.aggregate_async(client_weights)
+                    # self.test_latest_model_on_testdata(round_i)
+                    print("Data updated from Client ID: {}".format(client.id))
+                    client.response_queue.put((copy.deepcopy(self.latest_global_model), self.epoch)) 
+                    break
 
-        print(seq)      
         self.test_latest_model_on_testdata(self.num_round)
         for client in self.clients:
             client.response_queue.put("STOP")
