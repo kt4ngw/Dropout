@@ -13,9 +13,9 @@ import torch.nn.functional as F
 class FDMSTrainer(BaseFederated):
     def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power ):
         model = choose_model(options)
-        self.move_model_to_gpu(model, options)
-        self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
-        super(FDMSTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model, self.optimizer,)
+        # self.move_model_to_gpu(model, options)
+        # self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
+        super(FDMSTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power)
         self.scores = np.zeros((self.options['num_of_clients'], self.options['num_of_clients']))
         self.number_simultaneous_participation = np.zeros((self.options['num_of_clients'], self.options['num_of_clients']))
         # self.

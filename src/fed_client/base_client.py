@@ -7,7 +7,8 @@ import torch
 import copy
 from src.cost import ClientAttr, Cost
 import math
-
+from src.models.model import choose_model
+from src.optimizers.gd import GD
 from src.utils.torch_utils import get_flat_grad, get_state_dict, get_flat_params_from, set_flat_params_to
 
 
@@ -15,18 +16,34 @@ criterion = F.cross_entropy
 mse_loss = nn.MSELoss()
 from src.utils.torch_utils import *
 class Client():
-    def __init__(self, options, id, model, optimizer, local_dataset, system_attr):
+    def __init__(self, options, id, local_dataset, system_attr):
         self.options = options
         self.id = id
         self.local_dataset = local_dataset
-        self.model = model
-        self.optimizer = optimizer
         self.gpu = options['gpu']
         self.attr_dict = system_attr.get_client_attr(self.id)
         self.local_data_class_distribution, self.class_is_own = self.get_local_data_class_distribution()
         self.iterations = self.get_iterations()
         #print(self.iterations)
         # self.max_iterations = max_iterations
+        self.__pre_work(self.options)
+
+    def __pre_work(self, options):
+        self.model = choose_model(options)
+        # self.move_model_to_gpu(model, options)
+        self.optimizer = GD(self.model.parameters(), lr=options['lr']) 
+        self.move_model_to_gpu(self.model, options)
+
+    @staticmethod
+    def move_model_to_gpu(model, options):
+        if options['gpu'] >= 0:
+            device = options['gpu']
+            torch.cuda.set_device(device)
+            # torch.backends.cudnn.enabled = True
+            model.cuda()
+        #     print('>>> Use gpu on device {}'.format(device))
+        # else:
+        #     print('>>> Don not use gpu')
 
     def get_iterations(self, ):
         iterations = math.ceil(len(self.local_dataset) / self.options['batch_size'])
@@ -66,8 +83,9 @@ class Client():
         self.set_model_params(model_params_dict)
     
     def get_flat_model_params(self):
-        flat_params = get_flat_params_from(self.model)
-        return flat_params.detach()
+        flat_feature_extractor_params = get_flat_params_from(self.model.feature_extractor)
+        flat_classifier_params = get_flat_params_from(self.model.classifier)
+        return torch.cat((flat_feature_extractor_params, flat_classifier_params)).detach()
 
     def set_flat_model_params(self, flat_params):
         set_flat_params_to(self.model, flat_params)

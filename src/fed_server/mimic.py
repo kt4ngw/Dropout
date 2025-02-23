@@ -14,8 +14,8 @@ class MimicTrainer(BaseFederated):
     def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power ):
         model = choose_model(options)
         self.move_model_to_gpu(model, options)
-        self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
-        super(MimicTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model, self.optimizer,)
+
+        super(MimicTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model)
         self.scores = np.zeros((self.options['num_of_clients'], self.options['num_of_clients']))
         self.number_simultaneous_participation = np.zeros((self.options['num_of_clients'], self.options['num_of_clients']))
         self.C = [torch.zeros_like(self.latest_global_model) for _ in range(self.options['num_of_clients'])]
@@ -41,7 +41,7 @@ class MimicTrainer(BaseFederated):
             # print("C前", self.C)
             self.updating_of_corrective_variables(self.latest_global_model, local_model_paras_set)
             # print("C后", self.C)
-            self.optimizer.soft_decay_learning_rate()
+            # self.optimizer.soft_decay_learning_rate()
 
 
         self.test_latest_model_on_testdata(self.num_round)

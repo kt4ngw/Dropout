@@ -13,9 +13,9 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 
 class Reba_CLient(Client):
-    def __init__(self, options, id, model, optimizer, local_dataset, system_attr,  ):
+    def __init__(self, options, id, local_dataset, system_attr,  ):
 
-        super(Reba_CLient, self).__init__(options, id, model, optimizer, local_dataset, system_attr, )
+        super(Reba_CLient, self).__init__(options, id, local_dataset, system_attr, )
 
 
     def local_train(self, round_i, global_proto):

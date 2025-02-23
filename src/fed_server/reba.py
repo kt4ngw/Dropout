@@ -16,8 +16,8 @@ class Reba(BaseFederated):
     def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power ):
         model = choose_model(options)
         self.move_model_to_gpu(model, options)
-        self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
-        super(Reba, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model, self.optimizer,)
+        # self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
+        super(Reba, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model)
         self.global_proto = None
  
     def train(self):
@@ -36,7 +36,7 @@ class Reba(BaseFederated):
 
             self.global_proto = self.aggregate_protos(local_model_proto_set)
 
-            self.optimizer.soft_decay_learning_rate()
+            # self.optimizer.soft_decay_learning_rate()
 
 
         self.test_latest_model_on_testdata(self.num_round)
@@ -124,7 +124,7 @@ class Reba(BaseFederated):
         train_label = dataset.trainLabel
         all_client = []
         for i in range(len(clients_label)):
-            local_client = Reba_CLient(self.options, i, self.model, self.optimizer, TensorDataset(torch.tensor(train_data[self.clients_label[i]]),
+            local_client = Reba_CLient(self.options, i, TensorDataset(torch.tensor(train_data[self.clients_label[i]]),
                                                 torch.tensor(train_label[self.clients_label[i]])), self.clients_system_attr)
             all_client.append(local_client)
 

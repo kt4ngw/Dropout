@@ -13,10 +13,9 @@ criterion = F.cross_entropy
 from src.utils.torch_utils import *
 class BaseFederated(object):
 
-    def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power, model=None, optimizer=None, name=''):
-        if model is not None and optimizer is not None:
+    def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power, model=None, name=''):
+        if model is not None:
             self.model = model
-            self.optimizer = optimizer
         self.clients_system_attr = ClientAttr(cpu_frequency, B, transmit_power)
         self.options = options
         self.dataset = dataset
@@ -111,7 +110,7 @@ class BaseFederated(object):
         train_label = dataset.trainLabel
         all_client = []
         for i in range(len(clients_label)):
-            local_client = Client(self.options, i, self.model, self.optimizer, TensorDataset(torch.tensor(train_data[self.clients_label[i]]),
+            local_client = Client(self.options, i, TensorDataset(torch.tensor(train_data[self.clients_label[i]]),
                                                 torch.tensor(train_label[self.clients_label[i]])), self.clients_system_attr)
             all_client.append(local_client)
 

@@ -18,7 +18,8 @@ DATASETS = ['mnist', 'fashionmnist', 'cifar10']
 TRAINERS = {'fedavg': 'FedAvgTrainer',
             'fdms': 'FDMSTrainer',
             'mimic': "MimicTrainer",
-            'reba': 'Reba'
+            'reba': 'Reba',
+            'fedasync':'FedAsync',
             }
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
@@ -32,15 +33,15 @@ def input_options():
     parser.add_argument('--model_name', type=str, default='cifar10_alexnet', help='the model to train')
     parser.add_argument('--gpu', type=int, default=0, help='gpu id to use(e.g. 0,1,2,3)')
     parser.add_argument('--round_num', type=int, default=500, help='number of round in comm')
-    parser.add_argument( '--num_of_clients', type=int, default=30, help='numer of the clients')
-    parser.add_argument( '--c_fraction', type=float, default=0.5, help='C fraction, 0 means 1 client, 1 means total clients')
+    parser.add_argument( '--num_of_clients', type=int, default=100, help='numer of the clients')
+    parser.add_argument( '--c_fraction', type=float, default=0.1, help='C fraction, 0 means 1 client, 1 means total clients')
     parser.add_argument('--local_epoch', type=int, default=5, help='local train epoch')
     parser.add_argument( '--batch_size', type=int, default=50, help='local train batch size')
     parser.add_argument( "--lr", type=float, default=0.1, help="learning rate, use value from origin paper as default")
-    parser.add_argument('--seed', type=int, default=0, help='seed for randomness;')
+    parser.add_argument('--seed', type=int, default=1, help='seed for randomness;')
     # parser.add_argument( '--weight_decay', help='weight_decay;', type=int, default=1)
     # parser.add_argument( '--algorithm', help='algorithm;', choices=OPTIMIZERS, type=str, default='propose')
-    parser.add_argument( '--dirichlet', default=1, type=float, help='Dirichlet;')
+    parser.add_argument( '--dirichlet', default=10, type=float, help='Dirichlet;')
     parser.add_argument( '--server', type=str, default='fedavg', help='server')
     parser.add_argument('--opti', type=str, default='gd', help='optimize_;')
     parser.add_argument('--is_real_class', type=bool, default=True, help='is or is not evaluate class;')

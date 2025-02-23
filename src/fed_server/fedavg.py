@@ -10,8 +10,8 @@ class FedAvgTrainer(BaseFederated):
     def __init__(self, options, dataset, clients_label, cpu_frequency, B, transmit_power ):
         model = choose_model(options)
         self.move_model_to_gpu(model, options)
-        self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
-        super(FedAvgTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model, self.optimizer,)
+        # self.optimizer = GD(model.parameters(), lr=options['lr']) # , weight_decay=0.001
+        super(FedAvgTrainer, self).__init__(options, dataset, clients_label, cpu_frequency, B, transmit_power, model)
     
     def train(self):
         print('=== Select {} clients per round ===\n'.format(int(self.per_round_c_fraction * self.clients_num)))
@@ -19,21 +19,15 @@ class FedAvgTrainer(BaseFederated):
         for round_i in range(self.num_round):
 
             self.test_latest_model_on_testdata(round_i)
-
+            
             selected_clients = self.select_clients()
-
             # Solve minimization locally
             local_model_paras_set, stats = self.local_train(round_i, selected_clients)
-            
 
             self.latest_global_model = self.aggregate_parameters(local_model_paras_set)
 
-            self.optimizer.soft_decay_learning_rate()
-
-
         self.test_latest_model_on_testdata(self.num_round)
 
-        # # Save tracked information
         self.metrics.write()
 
     def select_clients(self):
